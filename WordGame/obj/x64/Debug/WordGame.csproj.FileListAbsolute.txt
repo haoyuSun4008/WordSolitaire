@@ -1,0 +1,10 @@
+C:\Users\Administrator\Desktop\wordslib\WordGame\WordGame\bin\x64\Debug\WordGame.exe.config
+C:\Users\Administrator\Desktop\wordslib\WordGame\WordGame\obj\x64\Debug\WordGame.csproj.ResolveComReference.cache
+C:\Users\Administrator\Desktop\wordslib\WordGame\WordGame\bin\x64\Debug\WordGame.exe
+C:\Users\Administrator\Desktop\wordslib\WordGame\WordGame\bin\x64\Debug\WordGame.pdb
+C:\Users\Administrator\Desktop\wordslib\WordGame\WordGame\obj\x64\Debug\WordGame.csprojResolveAssemblyReference.cache
+C:\Users\Administrator\Desktop\wordslib\WordGame\WordGame\obj\x64\Debug\WordGame.WordGame.resources
+C:\Users\Administrator\Desktop\wordslib\WordGame\WordGame\obj\x64\Debug\WordGame.Properties.Resources.resources
+C:\Users\Administrator\Desktop\wordslib\WordGame\WordGame\obj\x64\Debug\WordGame.csproj.GenerateResource.Cache
+C:\Users\Administrator\Desktop\wordslib\WordGame\WordGame\obj\x64\Debug\WordGame.exe
+C:\Users\Administrator\Desktop\wordslib\WordGame\WordGame\obj\x64\Debug\WordGame.pdb
