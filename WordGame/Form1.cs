@@ -856,6 +856,7 @@ namespace WordGame
 #endif
         //
         // program starts
+/* WordGame_Load start */
         private void WordGame_Load(object sender, EventArgs e)
         {
             //
@@ -863,9 +864,66 @@ namespace WordGame
             //get the running excel object now
             //TestApp = (Excel.Application)System.Runtime.InteropServices.Marshal.GetActiveObject("Excel.Application");
             #if (ch_ver)
-            Tips.Text = "我是英语单词接龙app！" + Environment.NewLine + "我接受的单词输入为原型单词，不支持复数变形、分词变形输入。" + Environment.NewLine +  "点击“开始游戏”吧！";
-            #endif
+            StartGame.Text = "开始接龙";
+            StartGame.Font = new Font("Simsun", 10, FontStyle.Bold);
+            StartGame.ForeColor = Color.Purple;
+            EndGame.Text = "结束接龙";
+            EndGame.Font = new Font("Simsun", 10, FontStyle.Bold);
+            EndGame.ForeColor = Color.Purple;
+            Test.Text = "测试";
+            Test.Font = new Font("Simsun", 10, FontStyle.Bold);
+            Test.ForeColor = Color.Purple;
+            Commit.Text = "提交";
+            Commit.Font = new Font("Simsun", 10, FontStyle.Bold);
+            Commit.ForeColor = Color.Purple;
+            label1.Text = "提示";
+            label1.Font = new Font("Simsun", 10, FontStyle.Bold);
+            label1.ForeColor = Color.Purple;
+            label2.Text = "玩家";
+            label2.Font = new Font("Simsun", 10, FontStyle.Bold);
+            label2.ForeColor = Color.Purple;
+            label3.Text = "电脑";
+            label3.Font = new Font("Simsun", 10, FontStyle.Bold);
+            label3.ForeColor = Color.Purple;
+            label4.Text = "60秒倒计时";
+            label4.Font = new Font("Simsun", 10, FontStyle.Bold);
+            label4.ForeColor = Color.Purple;
+            label5.Text = "历史记录";
+            label5.Font = new Font("Simsun", 10, FontStyle.Bold);
+            label5.ForeColor = Color.Purple;
+            Tips.Text = "我是英语单词接龙！" + Environment.NewLine + "我接受的单词输入为原型单词，不支持复数变形、分词变形输入。" + Environment.NewLine +  "点击“开始接龙”吧！";
+#endif
+            //
             #if (en_ver)
+            StartGame.Text = "Start Game";
+            // StartGame.Font = new Font("Segoe", 10, FontStyle.Bold);
+            // StartGame.ForeColor = Color.Purple;
+            EndGame.Text = "End Game";
+            // EndGame.Font = new Font("Segoe", 10, FontStyle.Bold);
+            // EndGame.ForeColor = Color.Purple;
+            Test.Text = "Test";
+            // Test.Font = new Font("Segoe", 10, FontStyle.Bold);
+            // Test.ForeColor = Color.Purple;
+            Commit.Text = "Commit";
+            // Commit.Font = new Font("Segoe", 10, FontStyle.Bold);
+            Commit.ForeColor = Color.Purple;
+            label1.Text = "Tips";
+            // label1.Font = new Font("Segoe", 10, FontStyle.Bold);
+            // label1.ForeColor = Color.Purple;
+            label2.Text = "Player";
+            // label2.Font = new Font("Segoe", 10, FontStyle.Bold);
+            // label2.ForeColor = Color.Purple;
+            label3.Text = "Computer";
+            // label3.Font = new Font("Segoe", 10, FontStyle.Bold);
+            // label3.ForeColor = Color.Purple;
+            label4.Text = " 60s counting down                                            Left Time:";
+            // label4.Font = new Font("Segoe", 10, FontStyle.Bold);
+            // label4.ForeColor = Color.Purple;
+            label5.Text = "history log";
+            // label5.Font = new Font("Segoe", 10, FontStyle.Bold);
+            // label5.ForeColor = Color.Purple;
+            // Tips.Font = new Font("Segoe", 10, FontStyle.Bold);
+            // Tips.ForeColor = Color.Black;
             Tips.Text = "I am the Solitaire Game of English Word! " + Environment.NewLine + "The English Word I Accepted Only Include the Original Words." + Environment.NewLine +  "Click 'Start' to Game!";
             #endif
             Tips.Refresh();
@@ -889,12 +947,16 @@ namespace WordGame
             //
             //this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
         }
+/* WordGame_Load end */
 
+/* VocalbularyRate start */
         private double VocalbularyRate()
         {
             return (double)(player_ans_num * 1000 / 103976);
         }
+/* VocalbularyRate end */
 
+/* StartGame_Click start */
         private void StartGame_Click(object sender, EventArgs e)
         {
             // MessageBox.Show("Start");
@@ -986,14 +1048,10 @@ namespace WordGame
             {
                 //
             }
-            // //
-            // // into endless cycle unless EndGame_Button is click
-            // while(!game_end_flg)
-            // {
-            //     process_schedule();
-            // }
         }
+/* StartGame_Click end */
 
+/* waiting_player_commit_start start */
         private void waiting_player_commit_start()
         {
             //
@@ -1010,7 +1068,9 @@ namespace WordGame
             timer1.Start();
             return;
         }
+/* waiting_player_commit_start end */
 
+/* EndGame_Click start */
         private void EndGame_Click(object sender, EventArgs e)
         {
             // set game_end_flg false, used to jump out and stop while() loop
@@ -1044,7 +1104,9 @@ namespace WordGame
             Tips.Refresh();
             return;
         }
+/* EndGame_Click end */
 
+/* EndGame_Timeout start */
         private void EndGame_Timeout()
         {
             // 
@@ -1075,12 +1137,15 @@ namespace WordGame
             Tips.Refresh();
             return;
         }
+/* EndGame_Timeout end */
 
+/* commit_Click start */
         private void commit_Click(object sender, EventArgs e)
         {
             // MessageBox.Show("Commit");
             string playerans = PlayerAns.Text;
             //
+            waiting_player_ans_flg = false;
             Commit.Enabled = false;
             // check the playerans
             if (!(player_ans_check(playerans)) || !(String.Equals(playerans, lookup_res_en)))
@@ -1094,16 +1159,16 @@ namespace WordGame
                 //
                 return;
             }
-            waiting_player_ans_flg = false;
-            //ComputerAnsInput = playerans;
-            // clear
-            //playerans = "";
-            // MessageBox.Show(playerans);
+            // if check ok, then go on below
+            //
             WriteInRecord(lookup_res_en, lookup_res_ch);
+            // save every English Word
             word_record_en[word_record_en_index++] = lookup_res_en;
+            // clear 'lookup_res_ch' 
+            // keep 'lookup_res_en' to be used in ComputerAns()
             lookup_res_ch = "";
             //
-            //record.AppendText(playerans + Environment.NewLine);
+            // clear playerAns zone
             PlayerAns.Text = "";
             PlayerAns.Refresh();
             //
@@ -1124,7 +1189,9 @@ namespace WordGame
                 waiting_player_commit_start();
             }
         }
+/* commit_Click end */
 
+/* player_ans_check start */
         private bool player_ans_check(string ans)
         {
             //
@@ -1177,7 +1244,7 @@ namespace WordGame
                         //
                         break;
                     }
-                    // 
+                    // the record exceeds 500
                     if ( index > 499 )
                     {
                         // throw error
@@ -1218,7 +1285,7 @@ namespace WordGame
                 Tips.Text = "单个字母类型的单词本程序目前不支持！";
                 #endif
                 #if (en_ver)
-                Tips.Text = "In this version, the word with JUST ONE CHARACTER is not supported!";
+                Tips.Text = "In this version, the words with JUST ONE CHARACTER are not supported!";
                 #endif
                 Tips.Refresh();
                 WaitingView(1500);
@@ -1226,9 +1293,6 @@ namespace WordGame
             }
             //
             ans_char = ans.ToCharArray();
-            //firstchar = ans.Substring(0, 1);
-            //secondchar = ans.Substring(1, 1);
-            // cycle to match a-z or A-Z with the last char
             in_alpha_table_flg = false;
             //
             // judge the first char
@@ -1249,7 +1313,7 @@ namespace WordGame
                     Tips.Text = "玩家提交的单词的第2个字符非英文字母！";
                     #endif
                     #if (en_ver)
-                    Tips.Text = "The second character in the word you committed is not a right English character!";
+                    Tips.Text = "The second character you committed is not a valid English character!";
                     #endif
                     Tips.Refresh();
                     WaitingView(1500);
@@ -1263,28 +1327,12 @@ namespace WordGame
                 Tips.Text = "玩家提交的单词的第1个字符非英文字母！";
                 #endif
                 #if (en_ver)
-                Tips.Text = "The first character in the word you committed is not a right English character!";
+                Tips.Text = "The first character you committed is not a valid English character!";
                 #endif
                 Tips.Refresh();
                 WaitingView(1500);
                 return false;
             }
-            // for ( index = 0; index < 26; index++ )
-            // {
-            //     // prepare to convert decimal to ASCII
-            //     // 'a' --------> 97
-            //     // 'A' --------> 65
-            //     btnumLower = new byte[] { (byte)(dec_a + index) };
-            //     btnumUpper = new byte[] { (byte)(dec_A + index) };
-            //     if (String.Equals(firstchar, encodeing.GetString(btnumLower)) || String.Equals(firstchar, encodeing.GetString(btnumUpper)))
-            //     {
-            //         //
-            //         in_alpha_table_flg = true;
-            //         target_sublib_dir = encodeing.GetString(btnumLower);
-            //         break;
-            //     }
-            // }
-            //
             // clear all excel process
             Process[] procs = Process.GetProcessesByName("EXCEL");
             foreach (Process pro in procs)
@@ -1348,7 +1396,9 @@ namespace WordGame
             //
             return (in_alpha_table_flg && in_wordlib_flg);
         }
+/* player_ans_check end */
 
+/* ComputerAns start */
         private void ComputerAns()
         {
             // MessageBox.Show("Commit");
@@ -1405,6 +1455,7 @@ namespace WordGame
             CompAns.Refresh();
             waiting_player_commit_start();
         }
+/* ComputerAns start */
 
         private void player_ans_check_err()
         {
@@ -1545,8 +1596,11 @@ namespace WordGame
         private void timer1_tick(object sender, EventArgs e)
         {
             // every 1000ms elapsed
+            int temp_timervalue = 0;
             timeout_cnt++;
             TimeBar.PerformStep();
+            temp_timervalue = 60 - TimeBar.Value;
+            timervalue.Text = temp_timervalue.ToString();
             if (timeout_cnt == 60)
             {
                 //timeout_flg = true;
@@ -1614,35 +1668,5 @@ namespace WordGame
                                   "[6]-All Right Reserved By HaoyuSun",
                                   "游戏规则", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-
-        // private void process_schedule()
-        // {
-        //     // check whether EndGame is requested
-        //     if (game_end_flg)
-        //     {
-        //         EndGame_Setting();
-        //         return;
-        //     }
-        //     // if not, then,
-        //     // this func used to process task shcdule
-        //     //
-        //     if (player_first_flg)
-        //     {
-        //         // player first
-        //         if (new_commit_flg)
-        //         {
-        //             //
-        //             new_commit_flg = false;
-        //             ComputerAns();
-        //         }
-        //         else
-        //         {
-        //         }
-        //     }
-        //     else
-        //     {
-        //         // computer first
-        //     }
-        // }
     }
 }

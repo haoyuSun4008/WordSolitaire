@@ -8,3 +8,13 @@ C:\Users\Administrator\Desktop\wordslib\WordGame\WordGame\obj\x64\Release\WordGa
 C:\Users\Administrator\Desktop\wordslib\WordGame\WordGame\obj\x64\Release\WordGame.exe
 C:\Users\Administrator\Desktop\wordslib\WordGame\WordGame\obj\x64\Release\WordGame.pdb
 C:\Users\Administrator\Desktop\wordslib\WordGame\WordGame\obj\x64\Release\WordGame.csprojResolveAssemblyReference.cache
+E:\WordGame\WordGame\bin\x64\Release\WordGame.exe.config
+E:\WordGame\WordGame\obj\x64\Release\WordGame.csproj.ResolveComReference.cache
+E:\WordGame\WordGame\obj\x64\Release\WordGame.exe
+E:\WordGame\WordGame\obj\x64\Release\WordGame.pdb
+E:\WordGame\WordGame\bin\x64\Release\WordGame.exe
+E:\WordGame\WordGame\bin\x64\Release\WordGame.pdb
+E:\WordGame\WordGame\obj\x64\Release\WordGame.csprojResolveAssemblyReference.cache
+E:\WordGame\WordGame\obj\x64\Release\WordGame.WordGame.resources
+E:\WordGame\WordGame\obj\x64\Release\WordGame.Properties.Resources.resources
+E:\WordGame\WordGame\obj\x64\Release\WordGame.csproj.GenerateResource.Cache
