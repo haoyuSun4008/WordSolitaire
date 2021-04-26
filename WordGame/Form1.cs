@@ -36,33 +36,44 @@ namespace WordGame
 {
     public partial class WordGame : Form
     {
-#if (TESTFLG1)
-        Excel.Application TestApp;
-#endif
+        // declare global vars
+        //
+        // var that store the num of valid words committed by player  
         int player_ans_num;
         //
         //string ComputerAnsInput;
         string lookup_res_en;
         string lookup_res_ch;
+        //
+        // var that used to record every word
         string[] word_record_en = new string[500];
         //
+        // var that check timeout
         int timeout_cnt = 0;
+        //
+        // var that store word index
         int word_record_en_index = 0;
+        //
+        // vars that store score
+        int computer_score = 0;        // AX length
+        int player_score = 0;          // AX length
+        //
+        // var that store the history logs
         uint record_num = 0;
         //
+        // vars that define game type
         bool player_first_flg = true;               //true : player
                                                     //false: computer
         bool game_mode_flg = true;                  //true : player - player
                                                     //false: player - computer
         bool playerans_first_check_flg = true;      //true : first check
                                                     //false: twice or more check
-        //bool game_end_flg = true;
-        //bool new_commit_flg = false;
-        //bool timeout_flg = false;
         //
+        // vars that influence the judgement of result
         bool waiting_computer_ans_flg = false;
         bool waiting_player_ans_flg = false;
         //
+        // vars that used to call Excel Progress to process Database
         Excel.Application app;
         Excel.Workbook wbook;
         Excel.Worksheet wsheet;
@@ -74,6 +85,7 @@ namespace WordGame
         //
         // Test Block
         private void button1_Click(object sender, EventArgs e)
+        // Test Button
         {
 #if (TESTFLG1)
             // define a range var
@@ -91,6 +103,7 @@ namespace WordGame
             // set the background selected red 
             rg.Interior.Color = Color.Red;
 #endif
+
 #if (TESTFLG2)
             // This debug is used to print all the active excel files
 
@@ -99,6 +112,7 @@ namespace WordGame
                 MessageBox.Show(wbk.Name);
             }
 #endif
+
 #if (TESTFLG3)
             // This debug is used to open a new excel window
 
@@ -860,9 +874,7 @@ namespace WordGame
         private void WordGame_Load(object sender, EventArgs e)
         {
             //
-            int index;
             //get the running excel object now
-            //TestApp = (Excel.Application)System.Runtime.InteropServices.Marshal.GetActiveObject("Excel.Application");
             #if (ch_ver)
             StartGame.Text = "开始接龙";
             StartGame.Font = new Font("Simsun", 10, FontStyle.Bold);
@@ -906,7 +918,7 @@ namespace WordGame
             // Test.ForeColor = Color.Purple;
             Commit.Text = "Commit";
             // Commit.Font = new Font("Segoe", 10, FontStyle.Bold);
-            Commit.ForeColor = Color.Purple;
+            // Commit.ForeColor = Color.Purple;
             label1.Text = "Tips";
             // label1.Font = new Font("Segoe", 10, FontStyle.Bold);
             // label1.ForeColor = Color.Purple;
@@ -928,22 +940,15 @@ namespace WordGame
             #endif
             Tips.Refresh();
             //
-            record.Text = "";
-            record.Refresh();
-            //
-            for (index = 0; index < 500; index++)
-            {
-                //
-                word_record_en[index] = "";
-            }
-            //
             EndGame.Enabled = false;
             Commit.Enabled = false;
             //
             PlayerAns.Enabled = false;
             CompAns.Enabled = false;
-            record.Enabled = false;
+            //record.Enabled = false;
             Test.Enabled = false;
+            Tips.Enabled = false;
+            timervalue.Enabled = false;
             //
             //this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
         }
@@ -960,6 +965,7 @@ namespace WordGame
         private void StartGame_Click(object sender, EventArgs e)
         {
             // MessageBox.Show("Start");
+            int index;
             DialogResult dr_who_first;  // DialogResult.Yes: player first
                                         // DialogResult.No : computer first
             //
@@ -971,11 +977,26 @@ namespace WordGame
             Commit.Enabled = true;
             //
             PlayerAns.Enabled = true;
-            CompAns.Enabled = true;
-            record.Enabled = true;
-            //
+            // clear data
+            lookup_res_en = "";
             record.Text = "";
             record.Refresh();
+            //
+            for (index = 0; index < 500; index++)
+            {
+                //
+                word_record_en[index] = "";
+            }
+            timeout_cnt = 0;
+            word_record_en_index = 0;
+            record_num = 0;
+            waiting_computer_ans_flg = false;
+            waiting_player_ans_flg = false;
+            //
+            ComputerScore.Text = "0";
+            ComputerScore.Refresh();
+            PlayerScore.Text = "0";
+            PlayerScore.Refresh();
             //
             #if (ch_ver)
             dr_game_mode = MessageBox.Show(this, "点击“是”确认和玩家自己接龙；" + Environment.NewLine + "点击“否”确认和电脑接龙！", "游戏模式选择", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -986,20 +1007,10 @@ namespace WordGame
             //
             if (dr_game_mode == DialogResult.Yes)
             {
+                //
                 game_mode_flg = true;    // player - player
-                // leave enough time for player to commit its ans
-                // update the tip
-                waiting_player_ans_flg = true;
-                #if (ch_ver)
-                Tips.Text = "等待玩家提交单词！" + Environment.NewLine + "你有60s的时间来提交一个起始单词！";
-                #endif
-                #if (en_ver)
-                Tips.Text = "Waiting player to commit word." + Environment.NewLine + "You have the time of 60s to commit a start word.";
-                #endif
-                Tips.Refresh();
-                // start timer1
-                timeout_cnt = 0;
-                timer1.Start();
+                //
+                waiting_player_commit_start();
             }
             else if (dr_game_mode == DialogResult.No)
             {
@@ -1036,8 +1047,8 @@ namespace WordGame
                     player_first_flg = false;  // computer starts first
                                                // only get its value here, don't change anymore
                     ComputerAns();
-                    waiting_player_ans_flg = true;
-                    waiting_player_commit_start();
+                    // waiting_player_ans_flg = true;
+                    // waiting_player_commit_start();
                 }
                 else
                 {
@@ -1048,6 +1059,8 @@ namespace WordGame
             {
                 //
             }
+            //
+            return;
         }
 /* StartGame_Click end */
 
@@ -1056,16 +1069,27 @@ namespace WordGame
         {
             //
             #if (ch_ver)
-            Tips.Text = "轮到玩家接龙！" + Environment.NewLine + "你仍有60s的时间来提交一个单词！";
+            Tips.Text = "轮到玩家接龙！" + Environment.NewLine + "你有60s的时间来提交一个单词！";
             #endif
             #if (en_ver)
-            Tips.Text = "Your turn to play!" + Environment.NewLine + "You have the time of 60s to commit a start word, too!";
+            Tips.Text = "Your turn to play!" + Environment.NewLine + "You have the time of 60s to commit a word!";
             #endif
             Tips.Refresh();
-            TimeBar.Value = 0;
-            timer1.Stop();
+            //
+            // start timing
             timeout_cnt = 0;
+            TimeBar.Value = 0;
             timer1.Start();
+            //
+            // enable commit button
+            Commit.Enabled = true;
+            //
+            // move cursor to PlayerAns zone
+            PlayerAns.Focus();
+            //
+            // set flag
+            waiting_player_ans_flg = true;
+            //
             return;
         }
 /* waiting_player_commit_start end */
@@ -1093,6 +1117,7 @@ namespace WordGame
             {
                 TimeBar.Value = 0;
                 timer1.Stop();
+                timervalue.Text = "0";
             }
             //
             #if (ch_ver)
@@ -1145,8 +1170,17 @@ namespace WordGame
             // MessageBox.Show("Commit");
             string playerans = PlayerAns.Text;
             //
-            waiting_player_ans_flg = false;
+            CompAns.Text = "";
+            CompAns.Refresh();
             Commit.Enabled = false;
+            //
+            #if (ch_ver)
+            Tips.Text = "查询你的提交中！";
+            #endif
+            #if (en_ver)
+            Tips.Text = "Checking your commit......";
+#endif
+            Tips.Refresh();
             // check the playerans
             if (!(player_ans_check(playerans)) || !(String.Equals(playerans, lookup_res_en)))
             {
@@ -1157,11 +1191,28 @@ namespace WordGame
                 //
                 Commit.Enabled = true;
                 //
+                score_update();
+                //
                 return;
             }
+            timer_something_reset();
             // if check ok, then go on below
             //
+            #if (ch_ver)
+            Tips.Text = "查询成功！";
+            #endif
+            #if (en_ver)
+            Tips.Text = "Check Successed!";
+            #endif
+            Tips.Refresh();
+            WaitingView(1500);
+            //
+            waiting_player_ans_flg = false;
+            //
             WriteInRecord(lookup_res_en, lookup_res_ch);
+            //
+            // get score
+            player_score += lookup_res_en.Length;
             // save every English Word
             word_record_en[word_record_en_index++] = lookup_res_en;
             // clear 'lookup_res_ch' 
@@ -1175,19 +1226,23 @@ namespace WordGame
             //new_commit_flg = true;
             player_ans_num++;
             //
-            if (!game_mode_flg)
+            score_update();
+            //
+            if (!game_mode_flg)         //true : player - player
+                                        //false: player - computer
             {
-                //
+                // game_mode_flg "fasle"
                 ComputerAns();
                 //
-                Commit.Enabled = true;
+                //Commit.Enabled = true;
             }
             else
             {
-                //
+                // game_mode_flg "true"
                 Commit.Enabled = true;
                 waiting_player_commit_start();
             }
+            return;
         }
 /* commit_Click end */
 
@@ -1203,15 +1258,7 @@ namespace WordGame
             bool in_alpha_table_flg = false;
             bool in_wordlib_flg = false;
             //
-            // used to convert int to its ASCII char
-            //byte[] btnumUpper;
-            //byte[] btnumLower;
-            //
             char[] ans_char = new char[20];
-            //string firstchar;
-            //string secondchar;
-            //
-            //string target_sublib_dir = "";
             // store app start path
             string startpath = Application.StartupPath;
             //
@@ -1225,10 +1272,10 @@ namespace WordGame
                 {
                     // throw error
                     #if (ch_ver)
-                    Tips.Text = "玩家提交的单词的首字母不是前一个单词的尾字母！";
+                    Tips.Text = "玩家提交的单词必须要以字母 " + lookup_res_en.Substring(lookup_res_en.Length - 1, 1) + " 开始！";
                     #endif
                     #if (en_ver)
-                    Tips.Text = "The first character in the word you committed is not the last character of the last word!";
+                    Tips.Text = "Your commit must start with " + lookup_res_en.Substring(lookup_res_en.Length - 1, 1) + " !";
                     #endif
                     Tips.Refresh();
                     WaitingView(1500);
@@ -1252,7 +1299,7 @@ namespace WordGame
                         Tips.Text = "单词记录已超过500条！请联系开发人员解决此问题！";
                         #endif
                         #if (en_ver)
-                        Tips.Text = "The total word record number exceeds 500 in the history log!" + Environment.NewLine + "Please contact the developer to solve this problem!";
+                        Tips.Text = "The total word records exceeds 500 in the history log!" + Environment.NewLine + "Please contact the developer to solve this problem!";
                         #endif
                         Tips.Refresh();
                         WaitingView(1500);
@@ -1285,7 +1332,7 @@ namespace WordGame
                 Tips.Text = "单个字母类型的单词本程序目前不支持！";
                 #endif
                 #if (en_ver)
-                Tips.Text = "In this version, the words with JUST ONE CHARACTER are not supported!";
+                Tips.Text = "For the current software version, the JUST ONE CHARACTER words are not supported!";
                 #endif
                 Tips.Refresh();
                 WaitingView(1500);
@@ -1313,7 +1360,7 @@ namespace WordGame
                     Tips.Text = "玩家提交的单词的第2个字符非英文字母！";
                     #endif
                     #if (en_ver)
-                    Tips.Text = "The second character you committed is not a valid English character!";
+                    Tips.Text = "The second char you committed is invalid!";
                     #endif
                     Tips.Refresh();
                     WaitingView(1500);
@@ -1327,7 +1374,7 @@ namespace WordGame
                 Tips.Text = "玩家提交的单词的第1个字符非英文字母！";
                 #endif
                 #if (en_ver)
-                Tips.Text = "The first character you committed is not a valid English character!";
+                Tips.Text = "The first char you committed is invalid!";
                 #endif
                 Tips.Refresh();
                 WaitingView(1500);
@@ -1342,6 +1389,7 @@ namespace WordGame
             //
             app = null;
             app = new Excel.Application();
+            //
             try
             {
                 //
@@ -1402,7 +1450,9 @@ namespace WordGame
         private void ComputerAns()
         {
             // MessageBox.Show("Commit");
+            // used to convert int to its ASCII char
             int dec_a = 97;
+            byte[] btnumLower;
             //int dec_A = 65;
             //
             string lastchar;
@@ -1411,48 +1461,80 @@ namespace WordGame
             //
             Random Rd = new Random();
             //
-            // used to convert int to its ASCII char
-            byte[] btnumLower;
-            //
-            waiting_player_ans_flg = true;
-            //
-            if (player_first_flg)
-            // player starts
+            if (player_first_flg)               //true : player first
+                                                //false: computer first
+            // player first
             {
                 // operate according to 'lookup_res_en'
                 lastchar = lookup_res_en.Substring(lookup_res_en.Length - 1, 1);
             }
             else
-            // computer starts
+            // computer first
             {
                 // operate according to random()
                 btnumLower = new byte[] { (byte)(dec_a + Rd.Next(0, 25)) };
                 lastchar = encodeing.GetString(btnumLower);
+                //
+                // bug fixed 20200425
+                // after the first turn computer use random index to play ,
+                // everytime computer should use player ans to play 
+                //
+                player_first_flg = true;
             }
+            //
+            #if (ch_ver)
+            Tips.Text = "电脑查询单词中......";
+            #endif
+            #if (en_ver)
+            Tips.Text = "Computer Is Checking Word......";
+            #endif
+            Tips.Refresh();
+            //
+            waiting_computer_ans_flg = true;
+            timer1.Start();
             //
             if (LookCompAnsInWordlib(lastchar))
             {
                 // lookup ok
+                waiting_computer_ans_flg = false;
+                timer_something_reset();
                 CompAns.Text = lookup_res_en;
                 word_record_en[word_record_en_index++] = lookup_res_en;
+                //
+                #if (ch_ver)
+                Tips.Text = "电脑查询单词成功！";
+                #endif
+                #if (en_ver)
+                Tips.Text = "Computer Checking Successed!";
+                #endif
+                Tips.Refresh();
+                //
+                CompAns.Text = lookup_res_en;
+                CompAns.Refresh();
+                //
+                computer_score += lookup_res_en.Length;
+                score_update();
+                //
+                WaitingView(1500);
             }
             else
             {
                 //lookup failed
+                computer_score -= 5;
+                if (computer_score < 0)
+                {
+                    computer_score = 0;
+                }
                 PlayerWin();
             }
-            waiting_computer_ans_flg = false;
             //
-            WaitingView(1500);
             WriteInRecord(lookup_res_en, lookup_res_ch);
-            lookup_res_en = "";
+            //lookup_res_en = "";
             lookup_res_ch = "";
-            // MessageBox.Show(playerans);
-            // write CompAns and its chinese meanings
-            //WriteInRecord();
             // clear CompAns Text
-            CompAns.Text = "";
-            CompAns.Refresh();
+            // CompAns.Text = "";
+            // CompAns.Refresh();
+            //
             waiting_player_commit_start();
         }
 /* ComputerAns start */
@@ -1461,16 +1543,26 @@ namespace WordGame
         {
             //
             #if (ch_ver)
-            Tips.Text = "玩家提交的单词有误！" + Environment.NewLine + "请重新输入！" + Environment.NewLine + "你仍有60s的时间来提交一个起始单词！";
+            Tips.Text = "玩家提交的单词有误！" + Environment.NewLine + "请重新输入！" + Environment.NewLine + "你只有" + timervalue.Text + "秒的时间来提交一个起始单词！";
             #endif
             #if (en_ver)
-            Tips.Text = "The word you committed is incorrect!" + Environment.NewLine + "Please commit again!" + Environment.NewLine + "You have the time of 60s to commit a start word, too!";
+            Tips.Text = "The word you committed is incorrect!" + Environment.NewLine + "Please commit again!" + Environment.NewLine + "You have only the left time of " + timervalue.Text + "s to commit a start word!";
             #endif
             Tips.Refresh();
-            TimeBar.Value = 0;
-            timer1.Stop();
-            timeout_cnt = 0;
-            timer1.Start();
+            //
+            player_score -= 5;
+            if (player_score < 0)
+            {
+                player_score = 0;
+            }
+            //
+            // Don't allow player access the way to refresh the Left Time by committing a 
+            // wrong or fake word -- bug fixed 2020/04/25
+            //
+            // TimeBar.Value = 0;
+            // timer1.Stop();
+            // timeout_cnt = 0;
+            // timer1.Start();
             return;
         }
 
@@ -1484,10 +1576,12 @@ namespace WordGame
             return;
         }
 
-        private bool LookCompAnsInWordlib(string lastchar)
+        private bool LookCompAnsInWordlib(string firstchar)
         {
             //
-            //int dec_a = 97;
+            // used to convert int to its ASCII char
+            int dec_a = 97;
+            byte[] btnumLower;
             //int dec_A = 65;
             int index = 0;
             int[] index_in_record = new int[50];
@@ -1501,10 +1595,16 @@ namespace WordGame
             // store app start path
             string startpath = Application.StartupPath;
             string tempword;
+            string secondchar;
+            //
+            char[] temp_word_en = new char[2];
             //
             bool is_lookup_ok = false;
-            bool is_nonredundent_flg = false;
+            bool is_nonredundent_flg = true;
             //
+            System.Text.ASCIIEncoding encodeing = new System.Text.ASCIIEncoding();
+            //
+            // Rd used to produce a random data
             Random Rd = new Random();
             // clear all excel process
             Process[] procs = Process.GetProcessesByName("EXCEL");
@@ -1519,18 +1619,44 @@ namespace WordGame
                 index_in_record[index] = 0;
             }
             //
+            // Ensure the xlsx lib to process exists; Logic Start
+INVAILD_TAIL_REDO:
+            while(true)
+            {
+                btnumLower = new byte[] { (byte)(dec_a + Rd.Next(0, 25)) };
+                secondchar = encodeing.GetString(btnumLower);
+                // check whether the random secondchar is valid in data lib
+                //   Valid: break while
+                // Invalid: still in while
+                // /* debug */ Console.WriteLine(startpath + @"\data\" + firstchar + @"\" + secondchar + ".xlsx");
+                if (System.IO.File.Exists(startpath + @"\data\" + firstchar + @"\" + secondchar + ".xlsx"))
+                {
+                    //
+                    // Console.WriteLine("Exist!");
+                    break;
+                }
+            }
+            // #if a
+            // Ensure the xlsx lib to process exists; Logic Over
+            //
             try
             {
                 //
                 app = new Excel.Application();
                 // open the target excel sublib file
-                wbook = app.Workbooks.Open(startpath + @"\data\" + lastchar + @"\lib.xlsx", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+                wbook = app.Workbooks.Open(startpath + @"\data\" + firstchar + @"\" + secondchar + ".xlsx", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
                 // read out the sheet1
                 wsheet = (Excel.Worksheet)wbook.Worksheets[1];
                 // 
+                // CompAns Search Step 1 Starts
+                // check all words in lib.xlsx one by one, and record the index of the word
+                // which is redundant with word_record_en[x]
                 for (index = 1; ; index++)
                 {
                     tempword = (wsheet.Cells[index, 1]).Text;
+                    //
+                    // when a blank cell is checked, finish checking and break for,
+                    // and THE_MAX_ROW got.
                     if (String.Equals(tempword, ""))
                     {
                         THE_MAX_ROW = index - 1;
@@ -1542,12 +1668,17 @@ namespace WordGame
                         //
                         if (String.Equals(word_record_en[index_record], tempword))
                         {
-                            index_in_record[index_in_record_index] = index;
-                            index_in_record_index++;
+                            index_in_record[index_in_record_index++] = index;
+                            //index_in_record_index++;
+                            break;
                         }
                     }
                 }
+                // CompAns Search Step 1 Over
                 //
+                // CompAns Search Step 2 Starts
+                // produce a random index to check whether it in redundant list
+                // check until different or timeout
                 while(true)
                 {
                     random_index_temp = Rd.Next(1, THE_MAX_ROW);
@@ -1569,7 +1700,21 @@ namespace WordGame
                     }
                 }
                 //
+                // CompAns Search Step 2 Over
                 lookup_res_en = (wsheet.Cells[random_index, 1]).Text;
+                //
+                // bug fixed 20200426
+                temp_word_en = lookup_res_en.Substring(lookup_res_en.Length - 1, 1).ToCharArray();
+                if ( ( (temp_word_en[0] > 'a') && (temp_word_en[0] < 'z') ) || ( (temp_word_en[0] > 'A') && (temp_word_en[0] < 'Z') ) )
+                {
+                    //
+                    // to avoid producing a special word with a num tail
+                }
+                else
+                {
+                    goto INVAILD_TAIL_REDO;
+                }
+                //
                 lookup_res_ch = (wsheet.Cells[random_index, 2]).Text;
                 is_lookup_ok = true;
             }
@@ -1584,13 +1729,14 @@ namespace WordGame
             app.Quit();
             app = null;
             //
+            // #endif
             return is_lookup_ok;
         }
 
         // stop 2s for 
-        private void WaitingView(int msec)
+        private void WaitingView(int milsec)
         {
-            System.Threading.Thread.Sleep(msec);
+            System.Threading.Thread.Sleep(milsec);
         }
 
         private void timer1_tick(object sender, EventArgs e)
@@ -1610,30 +1756,27 @@ namespace WordGame
             }
         }
 
+        private void timer_something_reset()
+        {
+            //
+            TimeBar.Value = 0;
+            timer1.Stop();
+            timeout_cnt = 0;
+        }
+
         private void timeout_gameover()
         {
-            // 
-            if (game_mode_flg)
-            // player - player mode
+            // GameOver due to Timeout
+            EndGame_Timeout();
+            if (waiting_player_ans_flg)
             {
                 //
-                EndGame_Timeout();
+                PlayerLose();
             }
-            else
-            // player - computer mode
+            if (waiting_computer_ans_flg)
             {
-                if (waiting_player_ans_flg)
-                {
-                    //
-                    PlayerLose();
-                    EndGame_Timeout();
-                }
-                if (waiting_computer_ans_flg)
-                {
-                    //
-                    PlayerWin();
-                    EndGame_Timeout();
-                }
+                //
+                PlayerWin();
             }
         }
 
@@ -1655,6 +1798,16 @@ namespace WordGame
             // 
             Tips.Text = "What a pity!" + Environment.NewLine + "你被电脑无情地击败了，电脑大获全胜！" + Environment.NewLine + "本次游戏过程体现了你的英语词汇量占词库比为千分之" + VocalbularyRate().ToString();
             Tips.Refresh();
+        }
+
+        private void score_update()
+        {
+            //
+            ComputerScore.Text = computer_score.ToString();
+            ComputerScore.Refresh();
+            PlayerScore.Text = player_score.ToString();
+            PlayerScore.Refresh();
+            return;
         }
 
         private void Help_Click(object sender, CancelEventArgs e)
